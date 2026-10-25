@@ -7,14 +7,18 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "node --env-file-if-exists=.env.local scripts/dev.mjs",
-    "start": "node --env-file-if-exists=.env.local scripts/dev.mjs",
-    "build": "node scripts/preview.mjs && node scripts/check.mjs",
+    "dev": "next dev",
+    "start": "next start",
+    "build": "next build",
     "test": "node scripts/preview.mjs && node --test tests/*.test.mjs",
     "check": "node scripts/check.mjs",
     "migrate:check": "node --env-file-if-exists=.env.local scripts/import.mjs",
     "preview:build": "node scripts/preview.mjs",
-    "pt2:check": "node scripts/prepare-pt2.mjs"
+    "pt2:check": "node scripts/prepare-pt2.mjs",
+    "next:dev": "next dev",
+    "next:build": "next build",
+    "next:start": "next start",
+    "next:lint": "next lint"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1156.0",
@@ -23,9 +27,18 @@
     "@neondatabase/auth": "^0.6.0-beta",
     "@vercel/functions": "^3.10.3",
     "jose": "^6.2.13",
-    "pg": "^8.23.1"
+    "next": "^15.5.0",
+    "pg": "^8.23.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "esbuild": "^0.28.2"
+    "esbuild": "^0.28.2",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.5.0",
+    "typescript": "^5.9.0"
   }
 }

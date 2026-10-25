@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 64, "column": 0}, "map": {"version":3,"sources":["file:///C:/ApplicationTeam/DEV/AI%20tutor/Family_Tutor_MVP/family-tutor/app/api/health/route.js"],"sourcesContent":["export async function GET() {\n  return Response.json({ ok: true, app: 'family-tutor', framework: 'nextjs' });\n}\r\n"],"names":["GET","Response","json","ok","app","framework"],"mappings":";;;;AAAO,eAAeA;IACpB,OAAOC,SAASC,IAAI,CAAC;QAAEC,IAAI;QAAMC,KAAK;QAAgBC,WAAW;IAAS;AAC5E"}}]
+}

@@ -1,0 +1,5 @@
+{
+  "/api/health/route": "app/api/health/route.js",
+  "/neondb/[...slug]/route": "app/neondb/[...slug]/route.js",
+  "/page": "app/page.js"
+}

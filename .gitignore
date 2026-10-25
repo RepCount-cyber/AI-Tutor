@@ -3,6 +3,7 @@
 .secrets/
 imports/
 node_modules/
+.next/
 .vercel/
 coverage/
 *.zip

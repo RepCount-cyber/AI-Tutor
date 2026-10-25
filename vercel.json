@@ -1,23 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "framework": null,
-  "outputDirectory": "public",
-  "functions": {
-    "api/index.mjs": {
-      "maxDuration": 120
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/index?route=:path*"
-    },
-    {
-      "source": "/neondb/:path*",
-      "destination": "/api/index?route=neondb/:path*"
-    }
-  ],
+  "framework": "nextjs",
   "headers": [
     {
       "source": "/(.*)",
