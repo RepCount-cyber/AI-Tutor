@@ -1,7 +1,10 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import Script from 'next/script';
 
-export default async function Page() {
-  const html = await fs.readFile(path.join(process.cwd(), 'public', 'index.html'), 'utf8');
-  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+export default function Page() {
+  return <>
+    <a className="skip" href="#main">Skip to content</a>
+    <div id="app"><main id="main" className="loading-screen"><span className="brand-mark">f<span>t</span></span><p>Opening your learning space…</p></main></div>
+    <div id="notification" className="toast" role="status" aria-live="polite" hidden />
+    <Script src="/app.js" strategy="afterInteractive" type="module" />
+  </>;
 }

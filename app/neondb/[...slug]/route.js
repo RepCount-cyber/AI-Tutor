@@ -13,7 +13,7 @@ async function proxyRequest(request) {
   const res = {
 	statusCode: 200,
 	setHeader(name, value) {
-	  headers[name] = String(value);
+	  headers[name] = value;
 	},
 	write(chunk) {
 	  chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
@@ -29,10 +29,11 @@ async function proxyRequest(request) {
 
   await legacyHandler(req, res);
   const buffer = Buffer.concat(chunks.length ? chunks : [Buffer.from('')]);
-  return new Response(buffer, {
-	status: res.statusCode || 200,
-	headers
-  });
+  const response = new Response(buffer, { status: res.statusCode || 200 });
+  for (const [name, value] of Object.entries(headers)) {
+    for (const item of Array.isArray(value) ? value : [value]) response.headers.append(name, String(item));
+  }
+  return response;
 }
 
 export async function GET(request) {
