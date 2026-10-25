@@ -1,0 +1,22 @@
+Family Tutor 2 — build report
+Date: 2026-10-24 (Asia/Dubai)
+Runtime: Node.js 24.22.1; app supports Node.js 22+
+
+PASS: JavaScript syntax checks for 36 modules and JSON configuration validation.
+PASS: 77 local automated tests; 0 failed, 0 skipped.
+PASS: compiled standalone preview startup, navigation, both child profiles and Jarvis panel checks in a Node VM/document stub.
+PASS: PDF.js legacy engine extracted expected Mathematics text from Grade 1 physical page 2 and Grade 8 physical page 3 of the uploaded portion documents.
+PASS: scheduling tests fit 180 net school-study minutes on Saturday and Sunday for both grades, with Saturday madrasa protected at 08:30–13:00.
+
+Includes shared Google PKCE/profile flow, checklists, server-timed learning sessions,
+separate offline reports, school uploads/content hashes, reviewed PDF text,
+MCQ/blank/matching/parent-reviewed short-answer flows, PT2 catalog and Jarvis.
+
+NOT EXECUTED: real Supabase SQL/RLS/timer functions, real Google OAuth,
+hosted Storage, real family-data migration, Vercel deployment, real browser
+visual/mobile/microphone QA, or live AI responses. Mock/VM tests do not establish
+production account, SQL, browser or microphone behaviour.
+
+AI stays disabled until a provider arrangement suitable for this child-facing
+application is configured. No live Gemini call or child audio capture was made.
+See SETUP.md and docs/VALIDATION.md before family use.

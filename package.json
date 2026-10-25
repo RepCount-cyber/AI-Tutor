@@ -1,0 +1,31 @@
+{
+  "name": "family-ai-tutor",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env.local scripts/dev.mjs",
+    "start": "node --env-file-if-exists=.env.local scripts/dev.mjs",
+    "build": "node scripts/preview.mjs && node scripts/check.mjs",
+    "test": "node scripts/preview.mjs && node --test tests/*.test.mjs",
+    "check": "node scripts/check.mjs",
+    "migrate:check": "node --env-file-if-exists=.env.local scripts/import.mjs",
+    "preview:build": "node scripts/preview.mjs",
+    "pt2:check": "node scripts/prepare-pt2.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1156.0",
+    "@neon/config": "^1.9.4",
+    "@neon/env": "^1.6.5",
+    "@neondatabase/auth": "^0.6.0-beta",
+    "@vercel/functions": "^3.10.3",
+    "jose": "^6.2.13",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

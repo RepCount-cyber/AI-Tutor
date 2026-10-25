@@ -1,0 +1,10 @@
+.env*
+!.env.example
+.secrets/
+imports/
+node_modules/
+.vercel/
+coverage/
+*.zip
+test-results/
+.neon
