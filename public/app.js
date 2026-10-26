@@ -66,7 +66,7 @@ function assessmentOptions() { return state.data.assessments.filter(a=>a.status=
 function sectionHeading(title,description,extra='') { const picker=['overview','progress','tutor','practice'].includes(state.page)&&lessons().length?`<div class="heading-assessment"><label for="page-assessment">Assessment</label><select id="page-assessment" data-select="assessment">${assessmentOptions()}</select></div>`:'';return `<div class="page-heading"><div><div class="eyebrow greeting-date">${esc(currentStudent()?.grade || 'Your family space')} · ${esc(state.assessment || 'Curriculum')}</div><h1>${esc(title)}</h1><p>${esc(description)}</p></div>${extra||picker}</div>`; }
 function loginView(message='') {
   const failure=new URLSearchParams(typeof location==='undefined'?'':location.search).get('signin');
-  $('#app').innerHTML=`<div class="login"><section class="login-story">${brand}<div><span class="eyebrow">Made for your family</span><h1 class="serif">Small steps.<br>Big discoveries.</h1><p>A thoughtful place to study, ask Jarvis, and grow a little more confident every day.</p>${art}</div><div class="login-footer">Learn · Practise · Reflect · Grow</div></section><main class="login-form-side" id="main"><div class="login-form-wrap"><span class="pill">Your family learning space</span><h2>Welcome back.</h2><p class="muted">One family Google login.<br>Then choose a child or Parent — no PIN.</p>${message||failure?`<div class="notice info">${esc(message||'Google sign-in could not be completed. Please try again.')}</div>`:''}<a class="btn google-signin" href="/api/google/start"><span aria-hidden="true">G</span> Continue with Google</a><p class="login-helper">Each device keeps its own selected profile.<br>Everyone can study at the same time.</p><div class="login-demo"><a href="/demo.html">Explore the sample family preview →</a></div></div></main></div>`;
+  $('#app').innerHTML=`<div class="login"><section class="login-story">${brand}<div><span class="eyebrow">Made for your family</span><h1 class="serif">Small steps.<br>Big discoveries.</h1><p>A thoughtful place to study, ask Jarvis, and grow a little more confident every day.</p>${art}</div><div class="login-footer">Learn · Practise · Reflect · Grow</div></section><main class="login-form-side" id="main"><div class="login-form-wrap"><span class="pill">Your family learning space</span><h2>Welcome back.</h2><p class="muted">One family Google login.<br>Then choose a child or Parent — no PIN.</p>${message||failure?`<div class="notice info">${esc(message||'Google sign-in could not be completed. Please try again.')}</div>`:''}<button type="button" class="btn google-signin" data-action="google-signin"><span aria-hidden="true">G</span> Continue with Google</button><p class="login-helper">Each device keeps its own selected profile.<br>Everyone can study at the same time.</p><div class="login-demo"><a href="/demo.html">Explore the sample family preview →</a></div></div></main></div>`;
 }
 function profilePicker(session) {
   stopJarvisVoice();
@@ -156,6 +156,7 @@ document.addEventListener('click', async event=>{
   b.disabled=true;
   try {
     if(b.dataset.selectProfile){if(preview){state.data=sampleData(b.dataset.selectProfile==='parent'?'parent':'child');state.data.students=state.familySession.students;const chosen=state.familySession.students.find(s=>s.id===b.dataset.selectProfile);if(chosen){state.data.profile={id:'demo-owner',role:'child',display_name:chosen.display_name,student_id:chosen.id};state.data.students=[chosen];}state.studentId=chosen?.id||null;resetLesson();syncSelection();renderApp();return;}await api('profile',{profile_id:b.dataset.selectProfile});resetLesson();state.studentId=null;state.timerId=null;await reload();return;}
+    if(b.dataset.action==='google-signin') { const {beginGoogleSignIn}=await import('./neon-auth.js'); await beginGoogleSignIn(); return; }
     if(b.dataset.action==='choose-profile'){if(state.timerId){state.timerPaused=true;await heartbeat(false);}profilePicker(state.familySession);return;}
     if(b.dataset.action==='logout') { if(preview){location.href='/';return;}await api('logout',{});state.data=null;loginView(); }
     else if(b.dataset.review) { state.results[b.dataset.review]=await api('feedback?id='+encodeURIComponent(b.dataset.review));renderApp(); }
@@ -211,7 +212,7 @@ document.addEventListener('submit',async event=>{
 
 async function init() {
   if(preview){state.data=sampleData(new URLSearchParams(location.search).get('view')==='child'?'child':'parent');state.familySession={students:[...state.data.students],choices:[{id:'parent',name:'Parent',role:'parent'},...state.data.students.map(s=>({id:s.id,name:s.display_name,grade:s.grade,role:'child'}))]};syncSelection();renderApp();return;}
-  try { await reload(); }
+  try { const {exchangeNeonSession}=await import('./neon-auth.js'); await exchangeNeonSession(); await reload(); }
   catch(e) { if(!state.data)loginView(e.message==='Please sign in to continue.'?'':e.message); }
 }
 configureLearningUI({state,api,reload,preview,notify,render:renderApp,esc,student:currentStudent,parent,lessons,heading:sectionHeading,filters:lessonFilters,empty});

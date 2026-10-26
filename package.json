@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "start": "next start",
-    "build": "next build",
+    "build": "node scripts/build-client.mjs && next build",
     "test": "node scripts/preview.mjs && node --test tests/*.test.mjs",
     "check": "node scripts/check.mjs",
     "migrate:check": "node --env-file-if-exists=.env.local scripts/import.mjs",
