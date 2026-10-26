@@ -3,6 +3,7 @@ import { authenticate, checkOrigin, setSession,allowedStudent, parseCookies } fr
 import { request, rpc,rows } from '../lib/db.mjs';
 import { beginGoogle,applyDeviceProfile,familyChoices,chooseDeviceProfile,appendCookie,cookie } from '../lib/family-auth.mjs';
 import { authConfig,establishNeonSession,sessionStore } from '../lib/neon-session.mjs';
+import { basicLoginConfigured,establishBasicSession } from '../lib/basic-auth.mjs';
 import { requestContext } from '../lib/neon-data.mjs';
 import { saveChecklist,portalCheck,offlineStudy,startTimer,timerTick,gradeAnswer,scopedQuestion,timerCredentials } from '../lib/learning.mjs';
 import { uploadMaterial,updateMaterialText,materialText,downloadMaterial } from '../lib/uploads.mjs';
@@ -38,7 +39,7 @@ async function handleRequest(req, res) {
     activeRoute=route;
     requireValue(['GET','POST'].includes(req.method), 'Method not allowed.', 405);
     if (req.method === 'GET' && route === 'health') {
-      res.statusCode = 200; return res.end(JSON.stringify({ status: 'ok', configured: Boolean(process.env.DATABASE_URL && process.env.NEON_AUTH_BASE_URL && process.env.FAMILY_GOOGLE_EMAIL), version: '2.0.0' }));
+      res.statusCode = 200; return res.end(JSON.stringify({ status: 'ok', configured: Boolean(process.env.DATABASE_URL && basicLoginConfigured()), version: '2.0.0' }));
     }
     if (route === 'google/start' && req.method === 'GET') return beginGoogle(res);
     if ((route === 'google/callback' || route === 'neondb/auth') && req.method === 'GET') {
@@ -75,6 +76,7 @@ async function handleRequest(req, res) {
     if (route === 'auth/config' && req.method === 'GET') { const cfg=authConfig();res.statusCode=200;return res.end(JSON.stringify({authUrl:cfg.base})); }
     let body = {};
     if (req.method === 'POST') { checkOrigin(req); body = await readBody(req, route === 'material/upload' ? 3100000 : 128000); }
+    if(route==='login'&&req.method==='POST') { if(!basicLoginConfigured()) throw new AppError(401,'Basic login is not enabled.'); const session=await establishBasicSession(body.username,body.password);setSession(res,session);appendCookie(res,cookie('ft_profile','',0));appendCookie(res,cookie('ft_timer','',0));res.statusCode=200;return res.end(JSON.stringify({success:true}));}
     if(route==='google/session'&&req.method==='POST') {const session=await establishNeonSession(body.token);setSession(res,session);appendCookie(res,cookie('ft_profile','',0));appendCookie(res,cookie('ft_timer','',0));res.statusCode=200;return res.end(JSON.stringify({success:true}));}
     if (route === 'logout' && req.method === 'POST') {
       try { const auth = await authenticate(req, res); await sessionStore.revoke(auth.token); } catch { /* Always clear local credentials. */ }
