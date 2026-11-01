@@ -250,72 +250,80 @@ function downloadTimetable() {
     { name: 'Tuesday', date: addDays(weekStart, 1), dayIdx: 1 },
     { name: 'Wednesday', date: addDays(weekStart, 2), dayIdx: 2 },
     { name: 'Thursday', date: addDays(weekStart, 3), dayIdx: 3 },
-    { name: 'Friday', date: addDays(weekStart, 4), dayIdx: 4 }
+    { name: 'Friday', date: addDays(weekStart, 4), dayIdx: 4 },
+    { name: 'Saturday', date: addDays(weekStart, 5), dayIdx: 5 },
+    { name: 'Sunday', date: addDays(weekStart, 6), dayIdx: 6 }
   ];
   const studentName = s ? s.display_name : 'Student';
   const grade = s ? s.grade : '';
 
+  function tasksFor(date, startMin, endMin, fallback) {
+    const list = tasks.filter(t => t.scheduled_date === date && t.start_minute >= startMin && t.start_minute < endMin);
+    if (list.length) {
+      return list.map(t => '<strong>' + esc(t.subject) + '</strong><br>' + esc(t.topic) + ' <small>(' + t.planned_minutes + 'm)</small>').join('<br>');
+    }
+    return fallback;
+  }
+
   const rows = [
     {
       time: '6:30 - 7:30',
-      cells: days.map(() => 'Wake up, brush/bath, breakfast')
+      cells: days.map(d => d.dayIdx < 5 ? 'Wake up, brush/bath, breakfast' : d.dayIdx === 5 ? 'Wake up, breakfast, prepare for Madrasa' : 'Wake up, relaxed breakfast')
     },
     {
-      time: '7:30 - 8:00',
-      cells: days.map(() => 'Study or revise')
+      time: '7:30 - 8:15',
+      cells: days.map(d => d.dayIdx < 5 ? 'Study or revise' : d.dayIdx === 5 ? 'Travel to Madrasa' : 'Family morning / light reading')
     },
     {
-      time: '8:15 - 3:50',
-      cells: days.map(() => 'School')
-    },
-    {
-      time: '3:45 - 4:00',
-      cells: [
-        'Snack + relax. No screen during snack.',
-        'Snack + relax.',
-        'Snack + relax.',
-        'Snack + relax.',
-        'Snack + relax.'
-      ]
-    },
-    {
-      time: '4:00 - 5:00',
+      time: '8:15 - 13:00',
       cells: days.map(d => {
-        const dTasks = tasks.filter(t => t.scheduled_date === d.date && t.start_minute < 1050);
-        if (dTasks.length) {
-          return dTasks.map(t => '<strong>' + esc(t.subject) + '</strong><br>' + esc(t.topic)).join('<br><br>');
-        }
-        return 'Study / revision';
+        if (d.dayIdx < 5) return 'School';
+        if (d.dayIdx === 5) return '<strong>Madrasa</strong><br>8:30 – 13:00';
+        return tasksFor(d.date, 500, 780, 'Weekend study blocks 1 & 2');
       })
     },
     {
-      time: '5:00 - 6:45',
+      time: '13:00 - 16:00',
+      cells: days.map(d => {
+        if (d.dayIdx < 5) return 'School (until 3:50) + Snack & relax';
+        if (d.dayIdx === 5) return tasksFor(d.date, 780, 1020, 'Travel, lunch, rest<br>Weekend study blocks 1 & 2');
+        return 'Lunch & family rest';
+      })
+    },
+    {
+      time: '16:00 - 17:00',
+      cells: days.map(d => {
+        if (d.dayIdx < 5) return tasksFor(d.date, 960, 1050, 'Study / revision');
+        if (d.dayIdx === 5) return 'Rest & outdoor preparation';
+        return tasksFor(d.date, 960, 1050, 'Weekend study block 3');
+      })
+    },
+    {
+      time: '17:00 - 18:45',
       cells: days.map(() => 'Outdoor play / sports')
     },
     {
-      time: '6:45 - 7:15',
-      cells: days.map(() => 'Quran reading')
+      time: '18:45 - 19:15',
+      cells: days.map(() => grade === 'Grade 1' ? 'Surah revision' : 'Quran reading')
     },
     {
-      time: '7:15 - 8:00',
+      time: '19:15 - 20:00',
       cells: days.map(() => 'Dinner + family time')
     },
     {
-      time: '8:00 - 9:00',
+      time: '20:00 - 21:00',
       cells: days.map(d => {
-        const dTasks = tasks.filter(t => t.scheduled_date === d.date && t.start_minute >= 1050);
-        if (dTasks.length) {
-          return dTasks.map(t => '<strong>' + esc(t.subject) + '</strong><br>' + esc(t.topic)).join('<br><br>');
-        }
-        return 'Homework / light revision';
+        if (d.dayIdx < 5) return tasksFor(d.date, 1050, 1440, 'Homework / light revision');
+        if (d.dayIdx === 5) return tasksFor(d.date, 1050, 1440, 'Weekend study block 3');
+        return 'Pack bag & uniform for Monday, light review';
       })
     },
     {
-      time: '9:00 - 9:30',
-      cells: days.map(() => 'PS4 / free time')
+      time: '21:00 - 21:30',
+      cells: days.map(d => d.dayIdx < 5 ? 'PS4 / free time' : d.dayIdx === 5 ? 'Family movie / free time' : 'Wind-down / light reading')
     },
     {
-      time: '9:30 - 10:00',
+      time: '21:30 - 22:00',
       cells: days.map(() => 'Book reading, lights out by 10:00')
     }
   ];
@@ -345,14 +353,14 @@ function downloadTimetable() {
     '<div class="actions"><button class="btn-print" onclick="window.print()">Print / Save as PDF</button></div>' +
     '<div class="header">' +
     '<h1>' + esc(studentName) + ' Weekly Study Timetable</h1>' +
-    '<p class="subtitle">Balanced plan: school, morning revision, subject portions, Quran, play, reading, and rest · ' + esc(grade) + ' · Week of ' + esc(shortDate(weekStart)) + '</p>' +
+    '<p class="subtitle">Balanced 7-day plan: school, madrasa, morning recall, study portions, Quran, play, reading, and rest · ' + esc(grade) + ' · Week of ' + esc(shortDate(weekStart)) + '</p>' +
     '</div>' +
     '<table><thead><tr><th>Time</th>' +
     days.map(d => '<th>' + d.name + '</th>').join('') +
     '</tr></thead><tbody>' +
     rows.map(r => '<tr><td class="time-col">' + esc(r.time) + '</td>' + r.cells.map(c => '<td>' + c + '</td>').join('') + '</tr>').join('') +
     '</tbody></table>' +
-    '<div class="footer">Study method: 25 minutes focus + 5 minutes break. Keep phone/PS4 away during study blocks. Tick completed items daily.</div>' +
+    '<div class="footer">Study method: 25 minutes focus + 5 minutes break (Grade 1: 20 min). Saturday madrasa protected (08:30–13:00). 180 study minutes targets on weekends. Tick completed items daily.</div>' +
     '</body></html>';
 
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
@@ -369,7 +377,7 @@ function downloadTimetable() {
 function weekView() {
   const plan=own('plans').find(p=>p.week_start===state.week), tasks=own('tasks').filter(t=>t.scheduled_date>=state.week&&t.scheduled_date<=addDays(state.week,6));
   const warnings=Array.isArray(plan?.warnings)?plan.warnings:[];
-  return `${sectionHeading('A balanced week.','One coordinated plan across subjects, with space to practise and rest.')}<section class="card"><form id="plan-form" class="toolbar"><div class="field"><label for="assessment">Assessment portions</label><select id="assessment" name="assessment" data-select="assessment" required>${assessmentOptions()||'<option value="">No curriculum imported</option>'}</select></div><div class="field"><label for="week-start">Week beginning · Monday</label><input id="week-start" name="week_start" type="date" value="${esc(state.week)}" data-select="week" required></div>${parent()?`<button class="btn" type="submit"${!lessons().length?' disabled':''}>${icon('week')}${plan?'Update future sessions':'Create weekly plan'}</button>`:''}<button class="btn soft" type="button" data-action="download-timetable">${icon('external')} Download timetable</button></form>${parent()?'<p class="small muted">Uses saved availability, exam dates, subject priorities and practice results. Completed work and past sessions are preserved. Updates apply when you regenerate the week.</p>':''}${plan?`<p class="small muted">Saved plan: ${esc(plan.assessment)} · revision ${plan.revision} · ${tasks.reduce((n,t)=>n+t.planned_minutes,0)} study minutes this week.</p>`:''}${warnings.length?`<div class="notice"><strong>Things to keep in mind</strong><ul>${warnings.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></div>`:''}${tasks.length?`<div class="week-grid">${Array.from({length:5},(_,i)=>{const date=addDays(state.week,i),daily=tasks.filter(t=>t.scheduled_date===date);return `<section class="day-column"><div class="day-title ${date===state.data.today?'today':''}">${new Date(date+'T12:00:00Z').toLocaleDateString('en-GB',{weekday:'short',timeZone:'UTC'})}<span>${new Date(date+'T12:00:00Z').getUTCDate()}</span></div>${daily.length?daily.map(t=>`<article class="week-task ${t.status==='done'?'done':''}"><span class="pill">${esc(t.subject)}</span><h3>${esc(t.topic)}</h3><p>${minutes(t.start_minute)} · ${t.planned_minutes} min</p><p>${esc(t.activity)}</p>${t.status==='done'?'<span class="pill gray">Completed</span>':`<button class="link-button" data-start-task="${esc(t.id)}">Open ${icon('arrow')}</button>`}</article>`).join(''):'<div class="rest-day">No study session<br>planned</div>'}</section>`;}).join('')}</div>`:empty(parent()?'Choose an assessment, save availability, then create this week’s plan.':'Your weekly plan will appear here when your parent creates it.')}</section>`;
+  return `${sectionHeading('A balanced week.','One coordinated plan across subjects, with space to practise and rest.')}<section class="card"><form id="plan-form" class="toolbar"><div class="field"><label for="assessment">Assessment portions</label><select id="assessment" name="assessment" data-select="assessment" required>${assessmentOptions()||'<option value="">No curriculum imported</option>'}</select></div><div class="field"><label for="week-start">Week beginning · Monday</label><input id="week-start" name="week_start" type="date" value="${esc(state.week)}" data-select="week" required></div>${parent()?`<button class="btn" type="submit"${!lessons().length?' disabled':''}>${icon('week')}${plan?'Update future sessions':'Create weekly plan'}</button>`:''}<button class="btn soft" type="button" data-action="download-timetable">${icon('external')} Download timetable</button></form>${parent()?'<p class="small muted">Uses saved availability, exam dates, subject priorities and practice results. Completed work and past sessions are preserved. Updates apply when you regenerate the week.</p>':''}${plan?`<p class="small muted">Saved plan: ${esc(plan.assessment)} · revision ${plan.revision} · ${tasks.reduce((n,t)=>n+t.planned_minutes,0)} study minutes this week.</p>`:''}${warnings.length?`<div class="notice"><strong>Things to keep in mind</strong><ul>${warnings.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></div>`:''}${tasks.length?`<div class="week-grid">${Array.from({length:7},(_,i)=>{const date=addDays(state.week,i),daily=tasks.filter(t=>t.scheduled_date===date);return `<section class="day-column"><div class="day-title ${date===state.data.today?'today':''}">${new Date(date+'T12:00:00Z').toLocaleDateString('en-GB',{weekday:'short',timeZone:'UTC'})}<span>${new Date(date+'T12:00:00Z').getUTCDate()}</span></div>${daily.length?daily.map(t=>`<article class="week-task ${t.status==='done'?'done':''}"><span class="pill">${esc(t.subject)}</span><h3>${esc(t.topic)}</h3><p>${minutes(t.start_minute)} · ${t.planned_minutes} min</p><p>${esc(t.activity)}</p>${t.status==='done'?'<span class="pill gray">Completed</span>':`<button class="link-button" data-start-task="${esc(t.id)}">Open ${icon('arrow')}</button>`}</article>`).join(''):'<div class="rest-day">No study session<br>planned</div>'}</section>`;}).join('')}</div>`:empty(parent()?'Choose an assessment, save availability, then create this week’s plan.':'Your weekly plan will appear here when your parent creates it.')}</section>`;
 }
 function lessonFilters() {
   const list=lessons().filter(l=>!state.subject||l.subject===state.subject);
